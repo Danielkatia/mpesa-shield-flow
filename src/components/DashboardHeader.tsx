@@ -1,7 +1,10 @@
-import { Bell, User } from "lucide-react";
+import { Bell, User, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export const DashboardHeader = () => {
+  const [isBalanceVisible, setIsBalanceVisible] = useState(true);
+
   return (
     <header className="bg-gradient-primary text-primary-foreground p-6 rounded-b-3xl shadow-card">
       <div className="flex items-center justify-between mb-4">
@@ -20,10 +23,26 @@ export const DashboardHeader = () => {
       </div>
       
       <div className="mt-6">
-        <p className="text-sm opacity-90 mb-2">Account Balance</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm opacity-90">Account Balance</p>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-6 w-6"
+            onClick={() => setIsBalanceVisible(!isBalanceVisible)}
+          >
+            {isBalanceVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+          </Button>
+        </div>
         <div className="flex items-baseline space-x-2">
-          <span className="text-3xl font-bold">KSh 12,450</span>
-          <span className="text-sm opacity-80">.50</span>
+          {isBalanceVisible ? (
+            <>
+              <span className="text-3xl font-bold">KSh 12,450</span>
+              <span className="text-sm opacity-80">.50</span>
+            </>
+          ) : (
+            <span className="text-3xl font-bold">KSh ••••••</span>
+          )}
         </div>
       </div>
     </header>
