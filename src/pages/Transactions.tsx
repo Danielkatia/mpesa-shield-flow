@@ -2,7 +2,10 @@ import { ArrowLeft, ArrowUpRight, ArrowDownLeft, Smartphone, Zap, Search, Filter
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const allTransactions = [
   {
@@ -81,6 +84,30 @@ const allTransactions = [
 
 const Transactions = () => {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState<string[]>(["send", "receive", "bill", "airtime"]);
+
+  const filterOptions = [
+    { value: "send", label: "Send Money", icon: ArrowUpRight },
+    { value: "receive", label: "Receive Money", icon: ArrowDownLeft },
+    { value: "bill", label: "Bill Payments", icon: Zap },
+    { value: "airtime", label: "Airtime", icon: Smartphone },
+  ];
+
+  // Filter transactions based on search term and selected filters
+  const filteredTransactions = allTransactions.filter(transaction => {
+    const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = selectedFilters.includes(transaction.type);
+    return matchesSearch && matchesFilter;
+  });
+
+  const handleFilterChange = (filterValue: string, checked: boolean) => {
+    if (checked) {
+      setSelectedFilters([...selectedFilters, filterValue]);
+    } else {
+      setSelectedFilters(selectedFilters.filter(f => f !== filterValue));
+    }
+  };
 
   return (
     <div className="min-h-screen bg-secondary/30">
@@ -105,12 +132,42 @@ const Transactions = () => {
               <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-foreground/60" />
               <Input 
                 placeholder="Search transactions..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/60"
               />
             </div>
-            <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10">
-              <Filter className="w-5 h-5" />
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10 relative">
+                  <Filter className="w-5 h-5" />
+                  {selectedFilters.length < 4 && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full"></span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-3" side="bottom" align="end">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm">Filter by type</h4>
+                  {filterOptions.map((option) => {
+                    const Icon = option.icon;
+                    return (
+                      <div key={option.value} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={option.value}
+                          checked={selectedFilters.includes(option.value)}
+                          onCheckedChange={(checked) => handleFilterChange(option.value, checked as boolean)}
+                        />
+                        <Icon className="w-4 h-4 text-muted-foreground" />
+                        <label htmlFor={option.value} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          {option.label}
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -118,7 +175,7 @@ const Transactions = () => {
         <div className="p-6 space-y-6">
           {/* Group transactions by date */}
           {["Today", "Yesterday", "23 Jan 2024", "22 Jan 2024", "21 Jan 2024", "20 Jan 2024", "18 Jan 2024"].map(date => {
-            const dayTransactions = allTransactions.filter(t => t.date === date);
+            const dayTransactions = filteredTransactions.filter(t => t.date === date);
             if (dayTransactions.length === 0) return null;
 
             return (
