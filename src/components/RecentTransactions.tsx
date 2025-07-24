@@ -1,5 +1,6 @@
 import { ArrowUpRight, ArrowDownLeft, Smartphone, Zap } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 const transactions = [
   {
@@ -37,11 +38,18 @@ const transactions = [
 ];
 
 export const RecentTransactions = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-foreground">Recent Transactions</h2>
-        <button className="text-primary text-sm font-medium">View All</button>
+        <button 
+          className="text-primary text-sm font-medium hover:underline"
+          onClick={() => navigate("/transactions")}
+        >
+          View All
+        </button>
       </div>
       
       <div className="space-y-3">
